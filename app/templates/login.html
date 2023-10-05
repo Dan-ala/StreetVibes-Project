@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">    
+</head>
+<body>
+   <p><a href="/"><--</a></p>
+   {% if error %}
+   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+   <script>Swal.fire({
+      icon: 'error',
+      title: 'Credenciales Incorrectas...',
+      text: 'En caso de no estar registrado da clic en SIGN IN',
+
+    })
+    </script>
+   {% endif %}
+   {% if msg %}
+   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>Swal.fire(
+     'Good job!',
+     'SU REGISTRO FUE EXITOSO!',
+     'success'
+   )
+     </script>
+   {% endif %}
+  
+   
+
+    <div class="wrapper">
+        <div class="card-switch">
+            <label class="switch">
+               <input type="checkbox" class="toggle">
+               <span class="slider"></span>
+               <span class="card-side"></span>
+               <div class="flip-card__inner">
+                  <div class="flip-card__front">
+                     <div class="title">Log in   or ->  Sign in</div>
+                     <form class="flip-card__form" action="/login" method="post">
+                        <input class="flip-card__input" name="usuario" placeholder="User" type="text">
+                        <input class="flip-card__input" name="password" placeholder="Password" type="password">
+                        <button class="flip-card__btn" type="submit" >Let`s go!</button>
+                     </form>
+                  </div>
+                  <div class="flip-card__back">
+                     <div class="title">Sign up or -> Log in</div>
+                     <form class="flip-card__form" action="registrarclie"  method="post">
+                        <input class="flip-card__input"  required="" placeholder="Name" type="text" name="nomClie">
+                        <input class="flip-card__input"   required="" placeholder="Last name" type="text" name="apellidoClie">
+                        <input class="flip-card__input"  required="" name="email" placeholder="Email" type="text" name="email">
+                        <input class="flip-card__input"  required="" placeholder="Phone numbern" type="number" name="telClie">
+                        <input class="flip-card__input"  required="" placeholder="User" type="text" name="usuario">
+                        <input class="flip-card__input"  required="" name="password" placeholder="Password" type="password" name="password">
+                        <button class="flip-card__btn">Confirm!</button>
+                     </form>
+                  </div>
+               </div>
+            </label>
+        </div>   
+   </div>
+   <script type="text/javascript" src="{{ url_for('static', filename='js/login.js') }}"></script>
+
+</body>
+</html>

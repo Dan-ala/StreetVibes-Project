@@ -1,0 +1,20 @@
+
+.editar{
+    /* background-color: #ee82ee; */
+    margin-right: 50px;
+}
+
+.eliminar{
+    /* background-color: blue; */
+    font-size: 19px;
+    margin-left: 88px;
+    margin-top: -29px;
+}
+
+.edit-button{
+    margin-left: 30px;
+}
+
+.delete-button{
+    margin-left: 35px;
+}

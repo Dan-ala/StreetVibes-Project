@@ -1,7 +1,8 @@
 <!doctype html>
 <html lang="en">
+
 <head>
-  <title>Registro Referencias</title>
+  <title>Editar Referencias</title>
   <!-- Required meta tags -->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -9,32 +10,42 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/regresar.css') }}">
 
 </head>
+
 <body>
   {% if msg %}
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
    <script>Swal.fire(
     'Good job!',
-    'REFERENCIA INGRESADA DE MANERA CORRECTA!',
+    'REFERENCIA EDITADA CORRECTAMENTE!',
     'success'
   )
     </script>
   {% endif %}
 
-  <button class="Btn" >
-  
-    <div class="sign"><svg viewBox="0 0 512 512"><path d="M377.9 105.9L500.7 228.7c7.2 7.2 11.3 17.1 11.3 27.3s-4.1 20.1-11.3 27.3L377.9 406.1c-6.4 6.4-15 9.9-24 9.9c-18.7 0-33.9-15.2-33.9-33.9l0-62.1-128 0c-17.7 0-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32l128 0 0-62.1c0-18.7 15.2-33.9 33.9-33.9c9 0 17.6 3.6 24 9.9zM160 96L96 96c-17.7 0-32 14.3-32 32l0 256c0 17.7 14.3 32 32 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-64 0c-53 0-96-43-96-96L0 128C0 75 43 32 96 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32z"></path></svg></div>
-    
-    <div class="text"><a href="/Administrador">Return</a> </div>
+  <button class="Btn">
+
+    <div class="sign"><svg viewBox="0 0 512 512">
+        <path
+          d="M377.9 105.9L500.7 228.7c7.2 7.2 11.3 17.1 11.3 27.3s-4.1 20.1-11.3 27.3L377.9 406.1c-6.4 6.4-15 9.9-24 9.9c-18.7 0-33.9-15.2-33.9-33.9l0-62.1-128 0c-17.7 0-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32l128 0 0-62.1c0-18.7 15.2-33.9 33.9-33.9c9 0 17.6 3.6 24 9.9zM160 96L96 96c-17.7 0-32 14.3-32 32l0 256c0 17.7 14.3 32 32 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-64 0c-53 0-96-43-96-96L0 128C0 75 43 32 96 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32z">
+        </path>
+      </svg></div>
+
+      <!-- {% for categoria in categorias %}
+    <div class="text"><a href="{{ url_for('category', category_id=categoria.idCate) }}">Return</a> </div>
+    {% endfor %} -->
+
+    <div class="text"><a href="/catalogo">Return</a> </div>
   </button>
-  
-  
-  
- 
+
+
+
+
   <div class="login-box">
     <!-- Creación de un cuadro de inicio de sesión -->
-    <h2>FORM THE REFERENCES</h2>
-    <form action="{{ url_for('referencias') }}" method="POST" autocomplete="off" enctype="multipart/form-data">
+    <h2>EDIT REFERENCES</h2>
+    <form action="{{ url_for('editarReferencia', referencia_id=referencia.idRef) }}" method="POST" autocomplete="off" enctype="multipart/form-data">
       <!-- Formulario con acción en la ruta 'referencias' y método POST -->
+
       <div class="user-box">
         <label for="idCate">Seleccione la Categoría:</label>
         <br><br>
@@ -48,19 +59,20 @@
         </select>
       </div>
 
+      <br>
       <!-- Campos de entrada para nombre, precio y descripción -->
       <br>
       <div class="user-box">
-        <input type="text" name="nomRef" required="">
+        <input type="text" name="nomRef" required="" value="{{ referencia.nomRef }}">
         <label>Nombre</label>
       </div>
       <div class="user-box">
-        <input type="text" name="precioRef" required="">
-        <label>Precio</label>
+        <input type="text" name="descripcionRef" required="" value="{{ referencia.descripcionRef }}">
+        <label>Descripcion</label>
       </div>
       <div class="user-box">
-        <input type="text" name="descripcionRef" required="">
-        <label>Descripcion</label>
+        <input type="text" name="precioRef" required="" value="{{ referencia.precioRef }}">
+        <label>Precio</label>
       </div>
 
       <div class="user-box">
@@ -78,20 +90,15 @@
 
       <br>
 
-      <div class="user-box">
-        <label for="foto">Seleccione una foto:</label>
-        <br>
-        <input type="file" name="img">
-      </div>
-    
-      <button  class="button1" type="submit" value="upload">Send</button>
+      <button class="button1" type="submit" value="upload">Send</button>
 
     </form>
   </div>
-  
+
 
   <!-- Inclusión de un archivo JavaScript desde la carpeta 'static' -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script type="text/javascript" src="{{ url_for('static', filename='js/1.js') }}"></script>
 </body>
+
 </html>

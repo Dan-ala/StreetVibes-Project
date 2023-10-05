@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Window Customization</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.2/css/boxicons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/customize.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/regresar.css') }}">
+
+</head>
+<body>
+
+    <div class="container">
+        <button class="Btn">
+            <div class="sign"><svg viewBox="0 0 512 512">
+                <path
+                  d="M377.9 105.9L500.7 228.7c7.2 7.2 11.3 17.1 11.3 27.3s-4.1 20.1-11.3 27.3L377.9 406.1c-6.4 6.4-15 9.9-24 9.9c-18.7 0-33.9-15.2-33.9-33.9l0-62.1-128 0c-17.7 0-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32l128 0 0-62.1c0-18.7 15.2-33.9 33.9-33.9c9 0 17.6 3.6 24 9.9zM160 96L96 96c-17.7 0-32 14.3-32 32l0 256c0 17.7 14.3 32 32 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-64 0c-53 0-96-43-96-96L0 128C0 75 43 32 96 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32z">
+                </path>
+              </svg></div>
+            <div class="text"><a href="/catalogo-cliente">Return</a> </div>
+          </button>
+        <h2>Customize your item</h2>
+        <div class="wrapper">
+            <div class="editor-panel">
+                <div class="filter">
+                    <label class="title">Filters</label>
+                    <div class="options">
+                        <button class="active">Agregar Texto</button>
+                        <button>Saturation</button>
+                        <button>Inversion</button>
+                        <button>Grayscale</button>
+                    </div>
+                    <div class="slider">
+                        <div class="filter-info">
+                            <p class="name">Brightness</p>
+                            <p class="value">100%</p>
+                        </div>
+                        <input type="range" value="100" min="0" max="200">
+                    </div>
+                </div>
+                <div class="rotate">
+                    <label class="title">Rotate & Flip</label>
+                    <div class="options">
+                        <button><i class="fa-solid fa-rotate-left"></i></button>
+                        <button><i class="fa-solid fa-rotate-right"></i></button>
+                        <button><i class="bx bx-reflect-vertical"></i></button>
+                        <button><i class="bx bx-reflect-horizontal"></i></button>
+                    </div>
+                </div>
+            </div>
+            <div class="preview-img">
+                <img id="selected-image" width="180px" alt="img" class="m-2">
+            </div>
+        
+            <!-- Agrega tu script JavaScript al final del cuerpo del documento -->
+            <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    // Obtener la parte de la URL que contiene el identificador de la imagen
+                    var imageId = window.location.pathname.split("/").pop();
+        
+                    // Crear la URL completa de la imagen
+                    var imageUrl = "{{ url_for('static', filename='img/') }}" + imageId;
+        
+                    // Actualizar la fuente de la imagen en el elemento img
+                    var selectedImage = document.getElementById("selected-image");
+                    selectedImage.src = imageUrl;
+                });
+            </script>
+        </div>
+        <div class="controls">
+            <button class="reset-filter">Reset Filters</button>
+            <div class="row">
+                <button class="choose-img">Choose Image</button>
+                <button class="save-img">Save Image</button>
+            </div>
+        </div>
+    </div>
+    
+</body>
+</html>

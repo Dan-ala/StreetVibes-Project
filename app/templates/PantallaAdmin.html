@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>StreetVibes</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/cards.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/regresar.css') }}">
+
+    
+    
+</head>
+
+<body>
+  <div class="mydict">
+    <div>
+      
+      <label>
+        <input type="radio" name="radio" checked="">
+        <span><a href="/formulariodecategoria">Registrar Categorias</a></span>
+      </label>
+      <label>
+        <input type="radio" name="radio">
+        <span><a href="/refere">Registrar Referencias</a></span>
+      </label>
+     
+      
+
+      <label>
+        <input type="radio" name="radio">
+        <span><a href="/catalogo">CATALOGO</a></span>
+      </label>
+
+      <label>
+        <input type="radio" name="radio">
+        <span><a href="/listar">Editar Clientes</a></span>
+      </label>
+
+      <label>
+        <input type="radio" name="radio">
+        <span><a href="/">LogOut</a></span>
+      </label>
+      
+    </div>
+  </div>
+  <br><br><br>
+
+<div class="tarjetas-container">
+    <div class="card">
+        <div class="card-info">
+            <img class="img" src="{{ url_for('static', filename='img/buso8.png') }}" alt="Mi Imagen">
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-info">
+            <img class="img" src="{{ url_for('static', filename='img/buso7.png') }}" alt="Mi Imagen">
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-info">
+            <img class="img" src="{{ url_for('static', filename='img/buso6.png') }}" alt="Mi Imagen">
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-info">
+            <img class="img" src="{{ url_for('static', filename='img/buso5.png') }}" alt="Mi Imagen">
+        </div>
+      </div>
+      
+
+    </div>
+<br><br>
+
+    <div class="tarjetas-container2">
+
+      <div class="card">
+        <div class="card-info">
+            <img class="img" src="{{ url_for('static', filename='img/buso9.png') }}" alt="Mi Imagen">
+        </div>
+      </div>
+     
+      <div class="card">
+        <div class="card-info">
+            <img class="img" src="{{ url_for('static', filename='img/buso2.png') }}" alt="Mi Imagen">
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-info">
+            <img class="img" src="{{ url_for('static', filename='img/imagen.jpg') }}" alt="Mi Imagen">
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-info">
+            <img class="img" src="{{ url_for('static', filename='img/buso3.png') }}" alt="Mi Imagen">
+        </div>
+      </div>
+    </div>
+<br><br>
+    <div class="tarjetas-container3">
+
+      <div class="card">
+        <div class="card-info">
+            <img class="img" src="{{ url_for('static', filename='img/buso4.png') }}" alt="Mi Imagen">
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-info">
+            <img class="img" src="{{ url_for('static', filename='img/buso3.png') }}" alt="Mi Imagen">
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-info">
+            <img class="img" src="{{ url_for('static', filename='img/buso2.png') }}" alt="Mi Imagen">
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-info">
+            <img class="img" src="{{ url_for('static', filename='img/imagen.jpg') }}" alt="Mi Imagen">
+        </div>
+      </div>
+    </div>
+    <!-- Enlaces de redireccionamiento para los formularios  -->
+    
+
+    <script type="text/javascript" src="{{ url_for('static', filename='js/2.js') }}"></script>
+   
+    
+    
+    
+    
+    
+    
+</body>
+</html>
