@@ -26,8 +26,16 @@ def principal():
     return render_template("principal.html")
 
 @app.route('/admin')
-def pantaAdmin():
+def pantallaAdmin():
     return render_template("PantallaAdmin.html")
+
+@app.route('/metodopago')
+def metodo():
+    return render_template("Metodo_pago.html")
+    
+@app.route('/davivienda')
+def metododavi():
+    return render_template("pagardavi.html")
 # Ruta para mostrar el formulario de categorías
 @app.route('/formulariodecategoria')
 def inicioww():
@@ -275,6 +283,121 @@ def editarReferencias():
 
 
 
+
+
+#Testing Shopping-cart
+@app.route('/shopping-cart')
+def products():
+    conexion_MySQLdb = connectionBD()
+    referencias = get_referencias()
+    categorias = get_categorias()
+ 
+    cursor = conexion_MySQLdb.cursor(dictionary=True)
+    sql = "SELECT * FROM referencias"  #
+    cursor.execute(sql)
+
+    rows = cursor.fetchall()
+    return render_template('holi.html', products=rows, referencias=referencias, categorias=categorias)
+ 
+@app.route('/add', methods=['POST'])
+def add_product_to_cart():
+    _quantity = int(request.form['quantity'])
+    idRef = request.form['idRef']
+    # validate the received values
+    if _quantity and idRef and request.method == 'POST':
+ 
+        conexion_MySQLdb = connectionBD()
+ 
+        cursor = conexion_MySQLdb.cursor(dictionary=True)
+        sql = 'SELECT * FROM referencias WHERE idRef = %s'
+        cursor.execute(sql, (idRef,))
+        row = cursor.fetchone()
+
+        itemArray = { row['idRef'] : {'nomRef' : row['nomRef'], 'idRef' : row['idRef'], 'quantity' : _quantity, 'precioRef' : row['precioRef'], 'img' : row['img'], 'total_price': _quantity * row['precioRef']}}
+
+                 
+        all_total_price = 0
+        all_total_quantity = 0
+                 
+        session.modified = True
+        if 'cart_item' in session:
+            if row['idRef'] in session['cart_item']:
+                for key, value in session['cart_item'].items():
+                    if row['idRef'] == key:
+                        old_quantity = session['cart_item'][key]['quantity']
+                        total_quantity = old_quantity + _quantity
+                        session['cart_item'][key]['quantity'] = total_quantity
+                        session['cart_item'][key]['total_price'] = total_quantity * row['precioRef']
+            else:
+                session['cart_item'] = array_merge(session['cart_item'], itemArray)
+         
+            for key, value in session['cart_item'].items():
+                individual_quantity = int(session['cart_item'][key]['quantity'])
+                individual_price = float(session['cart_item'][key]['total_price'])
+                all_total_quantity = all_total_quantity + individual_quantity
+                all_total_price = all_total_price + individual_price
+        else:
+            session['cart_item'] = itemArray
+            all_total_quantity = all_total_quantity + _quantity
+            all_total_price = all_total_price + _quantity * row['precioRef']
+             
+        session['all_total_quantity'] = all_total_quantity
+        session['all_total_price'] = all_total_price
+                 
+        return redirect(url_for('products'))
+    else:
+        return 'Error while adding item to cart'
+
+ 
+@app.route('/empty')
+def empty_cart():
+    try:
+        session.clear()
+        return redirect(url_for('.products'))
+    except Exception as e:
+        print(e)
+ 
+@app.route('/deletess/<int:idRef>')
+def delete_product(idRef):
+    try:
+        all_total_price = 0
+        all_total_quantity = 0
+        session.modified = True
+         
+        for item in session['cart_item'].items():
+            if item[0] == idRef:    
+                session['cart_item'].pop(item[0], None)
+                if 'cart_item' in session:
+                    for key, value in session['cart_item'].items():
+                        individual_quantity = int(session['cart_item'][key]['quantity'])
+                        individual_price = float(session['cart_item'][key]['total_price'])
+                        all_total_quantity = all_total_quantity + individual_quantity
+                        all_total_price = all_total_price + individual_price
+                break
+         
+        if all_total_quantity == 0:
+            session.clear()
+        else:
+            session['all_total_quantity'] = all_total_quantity
+            session['all_total_price'] = all_total_price
+             
+        return redirect(url_for('.products'))
+    except Exception as e:
+        print(e)
+ 
+def array_merge( first_array , second_array ):
+    if isinstance( first_array , list ) and isinstance( second_array , list ):
+        return first_array + second_array
+    elif isinstance( first_array , dict ) and isinstance( second_array , dict ):
+        return dict( list( first_array.items() ) + list( second_array.items() ) )
+    elif isinstance( first_array , set ) and isinstance( second_array , set ):
+        return first_array.union( second_array )
+    return False
+
+
+
+
+
 #CATALOGO - DAN
 @app.route('/catalogo')
 def catalogo():
@@ -297,6 +420,10 @@ def catalogo():
 @app.route('/catalogo-cliente')
 def catalogoCliente():
     referencias = get_referencias()
+
+    #Shopping-Cart
+    
+
     return render_template('catalogoCliente.html',referencias=referencias)
 
 @app.route('/customize')
@@ -314,11 +441,11 @@ def camisetasOversize():
     categorias = get_categorias()
     return render_template('2CamisetasOversize/camisetasOversize.html',referencias=referencias,categorias=categorias)
 
-# @app.route('/catalogo2')
-# def catalogo2():
-#     referencias = get_referencias()
-#     categorias = get_categorias()
-#     return render_template('hola.html',referencias=referencias,categorias=categorias)
+@app.route('/catalogo2')
+def catalogo2():
+    referencias = get_referencias()
+    categorias = get_categorias()
+    return render_template('hola.html',referencias=referencias,categorias=categorias)
 
 
 # DIRECCIONES PARA CADA CATEGORÍA
@@ -448,7 +575,7 @@ def listar():
         return "Error en la conexión a la base de datos"
     
 #Eliminar Referencia
-@app.route('/eliminar/<int:referencia_id>', methods=['GET', 'POST'])
+@app.route('/eliminarReferencia/<int:referencia_id>', methods=['GET', 'POST'])
 def eliminarRef(referencia_id):
     conexion_MySQLdb = connectionBD()
     if conexion_MySQLdb:
@@ -510,7 +637,7 @@ def editarReferencia (referencia_id):
             return render_template('editarRef.html', referencia_id=referencia_id, referencia=referencia, categorias=categorias, telas=telas, msg="Well done!")
 
 
-@app.route('/eliminar/<int:cliente_id>', methods=['GET', 'POST'])
+@app.route('/eliminarCliente/<int:cliente_id>', methods=['GET', 'POST'])
 def eliminar(cliente_id):
     conexion_MySQLdb = connectionBD()
     if conexion_MySQLdb:
@@ -531,7 +658,7 @@ def eliminar(cliente_id):
 
 
 
-@app.route('/editar/<int:cliente_id>', methods=['GET', 'POST'])
+@app.route('/editarCliente/<int:cliente_id>', methods=['GET', 'POST'])
 def editar(cliente_id):
     conexion_MySQLdb = connectionBD()
     if conexion_MySQLdb:
@@ -548,7 +675,7 @@ def editar(cliente_id):
 
 
             # Ejecuta una consulta SQL para actualizar el cliente
-            sql = "UPDATE clientes SET nomClie=%s,apellidoClie=%s, email=%s,telClie=%s,usuario=%s,password=%s, WHERE idClie=%s"
+            sql = "UPDATE clientes SET nomClie=%s,apellidoCli=%s, email=%s,telClie=%s,usuario=%s,passw=%s WHERE idClie=%s"
             cursor.execute(sql, (nuevo_nombre,nuevo_apellidoClie, nuevo_email,nuevo_telClie,nuevo_usuario,nuevo_password, cliente_id))
 
             # Confirma la transacción y cierra la conexión
@@ -557,6 +684,7 @@ def editar(cliente_id):
             conexion_MySQLdb.close()
 
             # Redirige a la página de listar clientes después de editar
+
             return redirect(url_for('listar'))
         else:
             # Obtiene los datos del cliente a editar
@@ -564,8 +692,12 @@ def editar(cliente_id):
             cursor.execute(sql, (cliente_id,))
             cliente = cursor.fetchone()
 
-            return render_template('Formulario_Editar_cliente.html', cliente=cliente)
+            return render_template('Formulario_Editar_cliente.html',cliente_id=cliente_id, cliente=cliente)
+        
+
+#Shopping Cart
+
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=8000)

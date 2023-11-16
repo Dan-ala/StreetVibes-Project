@@ -79,32 +79,32 @@
                         <div class="login-box">
                             <h2>Register a new Category</h2>
                             <div class="user-box" >
-                            <input class="flip-card__input"  required="" autofocus type="text" name="nomClie">
+                            <input class="flip-card__input"  required="" autofocus type="text" name="nomClie" value="{{ cliente['nomClie'] }}">
                             <label>Nombre</label>
                             </div>
 
                             <div class="user-box" >
-                            <input class="flip-card__input"   required="" type="text" name="apellidoClie">
+                            <input class="flip-card__input"   required="" type="text" name="apellidoClie" value="{{ cliente['apellidoClie'] }}">
                             <label>Apellido</label>
                             </div>
 
                             <div class="user-box" >
-                            <input class="flip-card__input"  required="" name="email" type="text" name="email">
+                            <input class="flip-card__input"  required="" type="text" name="email" value="{{ cliente['email'] }}">
                             <label>Email</label>
                             </div>
 
                             <div class="user-box" >
-                            <input class="flip-card__input"  required=""  type="number" name="telClie">
+                            <input class="flip-card__input"  required=""  type="number" name="telClie" value="{{ cliente['telClie'] }}">
                             <label>Telefono</label>
                             </div>
                         
                             <div class="user-box" >
-                            <input class="flip-card__input"  required=""  type="text" name="usuario">
+                            <input class="flip-card__input"  required=""  type="text" name="usuario" value="{{ cliente['usuario'] }}">
                             <label>User</label>
                             </div>
 
                             <div class="user-box" >
-                            <input class="flip-card__input"  required="" name="password"  type="password" name="password">
+                            <input class="flip-card__input"  required=""  type="password" name="password" value="{{ cliente['password'] }}">
                             <label>Password</label>
                             </div>
 
