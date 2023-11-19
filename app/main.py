@@ -5,6 +5,8 @@ from config import connectionBD
 from werkzeug.utils import secure_filename
 import os
 import shutil
+import psycopg2
+import psycopg2.extras
 
 
 # Creación de una instancia de Flask
@@ -159,7 +161,7 @@ def get_referencias():
 
     if conexion_MySQLdb:
         cursor = conexion_MySQLdb.cursor(dictionary=True)
-        sql = "SELECT idRef, idCate, nomRef, precioRef, descripcionRef, idTela, img FROM referencias"  #
+        sql = "SELECT idRef, idCate, code, nomRef, precioRef, descripcionRef, idTela, img FROM referencias"  #
         cursor.execute(sql)  
         referencias = cursor.fetchall()  # Obtiene todas las filas de categorías
         cursor.close()  
@@ -173,7 +175,7 @@ def get_referencias1():
 
     if conexion_MySQLdb:
         cursor = conexion_MySQLdb.cursor(dictionary=True)
-        sql = "SELECT idRef, idCate, nomRef, precioRef, descripcionRef, idTela, img FROM referencias WHERE idCate = 1"  #
+        sql = "SELECT idRef, idCate, code, nomRef, precioRef, descripcionRef, idTela, img FROM referencias WHERE idCate = 1"  #
         cursor.execute(sql)  
         referencias1 = cursor.fetchall()  # Obtiene todas las filas de categorías
         cursor.close()  
@@ -188,7 +190,7 @@ def get_referencias2():
 
     if conexion_MySQLdb:
         cursor = conexion_MySQLdb.cursor(dictionary=True)
-        sql = "SELECT idRef, idCate, nomRef, precioRef, descripcionRef, idTela, img FROM referencias WHERE idCate = 2"  #
+        sql = "SELECT idRef, idCate, code, nomRef, precioRef, descripcionRef, idTela, img FROM referencias WHERE idCate = 2"  #
         cursor.execute(sql)  
         referencias2 = cursor.fetchall()  # Obtiene todas las filas de categorías
         cursor.close()  
@@ -203,7 +205,7 @@ def get_referencias3():
 
     if conexion_MySQLdb:
         cursor = conexion_MySQLdb.cursor(dictionary=True)
-        sql = "SELECT idRef, idCate, nomRef, precioRef, descripcionRef, idTela, img FROM referencias WHERE idCate = 3"  #
+        sql = "SELECT idRef, idCate, code,nomRef, precioRef, descripcionRef, idTela, img FROM referencias WHERE idCate = 3"  #
         cursor.execute(sql)  
         referencias3 = cursor.fetchall()  # Obtiene todas las filas de categorías
         cursor.close()  
@@ -218,7 +220,7 @@ def get_referencias4():
 
     if conexion_MySQLdb:
         cursor = conexion_MySQLdb.cursor(dictionary=True)
-        sql = "SELECT idRef, idCate, nomRef, precioRef, descripcionRef, idTela, img FROM referencias WHERE idCate = 4"  #
+        sql = "SELECT idRef, idCate, code, nomRef, precioRef, descripcionRef, idTela, img FROM referencias WHERE idCate = 4"  #
         cursor.execute(sql)  
         referencias4 = cursor.fetchall()  # Obtiene todas las filas de categorías
         cursor.close()  
@@ -232,6 +234,7 @@ def get_referencias4():
 def referencias():
     if request.method == 'POST':
         idCate = request.form['idCate']
+        code = request.form['code']
         nomRef = request.form['nomRef']
         precioRef = request.form['precioRef']
         descripcionRef = request.form['descripcionRef']
@@ -254,8 +257,8 @@ def referencias():
 
         if conexion_MySQLdb:
             cursor = conexion_MySQLdb.cursor(dictionary=True)
-            sql = "INSERT INTO referencias (idCate, nomRef, precioRef, descripcionRef, idTela, img) VALUES (%s, %s, %s, %s, %s, %s)"
-            valores = (idCate, nomRef, precioRef, descripcionRef, idTela, img)
+            sql = "INSERT INTO referencias (idCate, code, nomRef, precioRef, descripcionRef, idTela, img) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+            valores = (idCate, code, nomRef, precioRef, descripcionRef, idTela, img)
             cursor.execute(sql, valores)
             conexion_MySQLdb.commit()
             cursor.close()
@@ -301,53 +304,54 @@ def products():
  
 @app.route('/add', methods=['POST'])
 def add_product_to_cart():
-    _quantity = int(request.form['quantity'])
-    idRef = request.form['idRef']
-    # validate the received values
-    if _quantity and idRef and request.method == 'POST':
- 
-        conexion_MySQLdb = connectionBD()
- 
-        cursor = conexion_MySQLdb.cursor(dictionary=True)
-        sql = 'SELECT * FROM referencias WHERE idRef = %s'
-        cursor.execute(sql, (idRef,))
-        row = cursor.fetchone()
+        
+        _quantity = int(request.form['quantity'])
+        _code = request.form['code']
 
-        itemArray = { row['idRef'] : {'nomRef' : row['nomRef'], 'idRef' : row['idRef'], 'quantity' : _quantity, 'precioRef' : row['precioRef'], 'img' : row['img'], 'total_price': _quantity * row['precioRef']}}
+        if _quantity and _code and request.method == 'POST':
+            conexion_MySQLdb = connectionBD()
 
-                 
-        all_total_price = 0
-        all_total_quantity = 0
-                 
-        session.modified = True
-        if 'cart_item' in session:
-            if row['idRef'] in session['cart_item']:
-                for key, value in session['cart_item'].items():
-                    if row['idRef'] == key:
-                        old_quantity = session['cart_item'][key]['quantity']
-                        total_quantity = old_quantity + _quantity
-                        session['cart_item'][key]['quantity'] = total_quantity
-                        session['cart_item'][key]['total_price'] = total_quantity * row['precioRef']
+            #cursor = conexion_MySQLdb.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+            cursor = conexion_MySQLdb.cursor(dictionary=True)
+            cursor.execute('SELECT * FROM referencias WHERE code = %s', (_code,))
+            row = cursor.fetchone()
+
+            itemArray = {
+                    row['code']: {
+                        'nomRef': row['nomRef'],
+                        'code': row['code'],
+                        'quantity': _quantity,
+                        'precioRef': row['precioRef'],
+                        'img': row['img'],
+                        'total_price': _quantity * row['precioRef']
+                    }
+                }
+
+            if 'cart_item' not in session:
+                session['cart_item'] = {}
+
+            if _code in session['cart_item']:
+                session['cart_item'][_code]['quantity'] += _quantity
+                session['cart_item'][_code]['total_price'] = (
+                    session['cart_item'][_code]['quantity'] * row['precioRef']
+                )
             else:
                 session['cart_item'] = array_merge(session['cart_item'], itemArray)
-         
-            for key, value in session['cart_item'].items():
-                individual_quantity = int(session['cart_item'][key]['quantity'])
-                individual_price = float(session['cart_item'][key]['total_price'])
-                all_total_quantity = all_total_quantity + individual_quantity
-                all_total_price = all_total_price + individual_price
-        else:
-            session['cart_item'] = itemArray
-            all_total_quantity = all_total_quantity + _quantity
-            all_total_price = all_total_price + _quantity * row['precioRef']
-             
-        session['all_total_quantity'] = all_total_quantity
-        session['all_total_price'] = all_total_price
-                 
-        return redirect(url_for('products'))
-    else:
-        return 'Error while adding item to cart'
 
+            all_total_quantity = sum(
+                int(item['quantity']) for item in session['cart_item'].values()
+            )
+            all_total_price = sum(
+                float(item['total_price']) for item in session['cart_item'].values()
+            )
+
+            session['all_total_quantity'] = all_total_quantity
+            session['all_total_price'] = all_total_price
+
+            return redirect(url_for('products'))
+        else:
+            return 'Error: Invalid quantity or product ID'
  
 @app.route('/empty')
 def empty_cart():
@@ -357,7 +361,7 @@ def empty_cart():
     except Exception as e:
         print(e)
  
-@app.route('/deletess/<int:idRef>')
+@app.route('/delete/<int:idRef>')
 def delete_product(idRef):
     try:
         all_total_price = 0

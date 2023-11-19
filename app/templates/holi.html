@@ -65,9 +65,9 @@
                         <td class="col-sm-1 col-md-1 text-center"><strong>${{ price }} </strong></td>
                         <td class="col-sm-1 col-md-1 text-center"><strong>${{ item_price }} </strong></td>
                         <td class="col-sm-1 col-md-1">
-                        <a href="{{ url_for('.delete_product', idRef=session['cart_item'][key]['idRef']) }}" class="btn btn-danger">
-                            <span class="glyphicon glyphicon-remove"></span> Remove
-                        </a></td>
+                            <a href="{{ url_for('.delete_product', idRef=session['cart_item'][key]['code']) }}" class="btn btn-danger">
+                                <span class="glyphicon glyphicon-remove"></span> Remove
+                            </a></td>
                     </tr>
     {% endfor %}
                     <tr>
@@ -136,12 +136,13 @@
                                     <li><i class="icofont-star"></i></li>
                                 </ul>
                                 <h4 class="price">$ {{ referencia.precioRef }}</h4>
+                                <h4 class="price">$ {{ referencia.code }}</h4>
                             </div>
   
                             <div class="add-to-cart">
-        <input type="hidden" name="idRef" value="{{ referencia.idRef }}"/>
+        <input type="hidden" name="code" value="{{ referencia.code }}"/>
         <input type="text" class="product-quantity" name="quantity" value="1" size="2" />
-        <input type="submit" value="Add to Cart" class="default-btn" />
+        <input type="submit" value="Add to Cart" class="default-btn"/>
         <br><br>
         <a href="/customize/{{ referencia['img'] }}"><button class="cta">
             <span class="span">Customize</span>
