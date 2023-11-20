@@ -296,7 +296,7 @@ def products():
     categorias = get_categorias()
  
     cursor = conexion_MySQLdb.cursor(dictionary=True)
-    sql = "SELECT * FROM referencias"  #
+    sql = "SELECT * FROM referencias"
     cursor.execute(sql)
 
     rows = cursor.fetchall()
@@ -361,15 +361,15 @@ def empty_cart():
     except Exception as e:
         print(e)
  
-@app.route('/delete/<int:idRef>')
-def delete_product(idRef):
+@app.route('/delete/<string:code>')
+def delete_product(code):
     try:
         all_total_price = 0
         all_total_quantity = 0
         session.modified = True
          
         for item in session['cart_item'].items():
-            if item[0] == idRef:    
+            if item[0] == code:    
                 session['cart_item'].pop(item[0], None)
                 if 'cart_item' in session:
                     for key, value in session['cart_item'].items():
@@ -698,9 +698,6 @@ def editar(cliente_id):
 
             return render_template('Formulario_Editar_cliente.html',cliente_id=cliente_id, cliente=cliente)
         
-
-#Shopping Cart
-
 
 
 if __name__ == '__main__':

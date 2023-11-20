@@ -155,6 +155,7 @@
                 text-transform: uppercase;
                 font-weight: 600;
                 font-family: 'Open Sans', sans-serif;
+                cursor: pointer;
             }
             .default-btn:hover {
                 color: #fff;
