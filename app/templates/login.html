@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">   
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/StylesChatbot.css') }}">    
+ 
 </head>
 <body>
    <p><a href="/"><--</a></p>
@@ -61,6 +63,41 @@
         </div>   
    </div>
    <script type="text/javascript" src="{{ url_for('static', filename='js/login.js') }}"></script>
-
+   <div class="card">
+      <div class="chat-header">StreetBot  <span id="toggleChat" onclick="toggleChat()"> ▼</span></div>
+  
+      <div class="chat-window" id="chatbox">
+          <ul class="message-list"></ul>
+      </div>
+  
+      <div class="chat-input">
+          <input type="text" class="message-input" id="userInput" placeholder="Deajate ayudar de StreetBot">
+          <button onclick="enviarMensaje()" class="send-button">Send</button>
+      </div>
+  </div>
+  <script>
+      function enviarMensaje() {
+          var mensaje = document.getElementById("userInput").value;
+          document.getElementById("chatbox").innerHTML += "<p><strong>Tú:</strong> " + mensaje + "</p>";
+  
+          fetch('/chat', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ mensaje: mensaje })
+          })
+          .then(response => response.json())
+          .then(data => {
+              document.getElementById("chatbox").innerHTML += "<p><strong>Chatbot:</strong> " + data.respuesta + "</p>";
+              document.getElementById("userInput").value = "";
+          });
+      }
+  
+      function toggleChat() {
+          const card = document.querySelector('.card');
+          card.classList.toggle('minimized');
+      }
+  </script>
 </body>
 </html>

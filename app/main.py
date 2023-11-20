@@ -1,5 +1,5 @@
 # Importación de módulos necesarios
-from flask import Flask, request, render_template,redirect,url_for,session,redirect
+from flask import Flask, request, render_template,redirect,url_for,session,redirect, jsonify
 from flask_uploads import IMAGES, UploadSet, configure_uploads;
 from config import connectionBD
 from werkzeug.utils import secure_filename
@@ -22,24 +22,111 @@ destination_folder = 'app/static/img' #Este 'proceso', estará reflejado en la r
 
 # Rutas y Funciones
 
+
+respuestas = {
+    "hola": "¡Hola! ¿En qué puedo ayudarte?",
+    "¿qué puedes hacer?": "Te puedo brindar ayuda para:\n<ul><li>Registrarte e ingresar</li><li>Acceder a categorías</li><li>Buscar productos por nombre</li><li>Añadir productos al carrito</li><li>Realizar pagos</li><li>Personalizar tus productos</li></ul>",
+    "¿quién eres?": "Soy un chatbot creado por StreetVibes. Mis desarrolladores son Cristian Arango y Daniel Alarcón.",
+    "saludos": "¡Hola! ¿En qué puedo ayudarte?",
+    "adios": "¡Hasta luego! Espero vuelvas pronto",
+    "chau": "¡Hasta luego!",
+    "ayuda": "Puedo ayudarte con algunas preguntas simples. ¡Prueba a preguntarme algo!",
+    "default": "Lo siento, no entiendo esa pregunta."
+}
+
+# Definición de múltiples opciones para una misma respuesta
+opciones_hola = ["hola", "saludos", "buen día" , "HOLA", "helou","hi", "hola como estas","hellou"]
+opciones_adios = ["adios", "chau", "hasta luego", "Hasta pronto","chao", "nos vemos", "hasta la proxima", "See you", "La buena"]
+opciones_hacer = ["¿en qué me puedes ayudar?","en que me puedes ayudar","Que puedes hacer","¿Qué sabes hacer?","Que sabes hacer","¿Qué haces?","Que haces", "que puedes hacer"]
+
+# Actualización del diccionario de respuestas
+respuestas.update({opcion: respuestas["hola"] for opcion in opciones_hola})
+respuestas.update({opcion: respuestas["adios"] for opcion in opciones_adios})
+respuestas.update({opcion: respuestas["¿qué puedes hacer?"] for opcion in opciones_hacer})
+
+
+@app.route('/chat', methods=['POST'])
+def chat():
+    data = request.get_json()
+    mensaje = data["mensaje"].lower()
+
+    respuesta = respuestas.get(mensaje, respuestas["default"])
+
+    return jsonify({"respuesta": respuesta})
+
+
+def login_required(func):
+    def wrapper(*args, **kwargs):
+        if 'usuario' in session:
+            return func(*args, **kwargs)
+        else:
+            return redirect(url_for('login'))
+    wrapper.__name__ = func.__name__
+    return wrapper
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        # Obtiene los valores del formulario de inicio de sesión
+        session.clear()
+
+        usuario = request.form['usuario']
+        password = request.form['password']
+        credenciales_validas, es_admin = verificar_credenciales(usuario, password)
+
+        # Realiza la consulta para verificar las credenciales en la base de datos
+
+        conexion_MySQLdb = connectionBD()
+        cursor = conexion_MySQLdb.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM clientes WHERE usuario = %s AND passw = %s", (usuario, password))
+        user = cursor.fetchone()  # Obtén una fila de resultados
+
+        if user and password:
+            # Si las credenciales son correctas, inicia una sesión para el usuario
+            session['usuario'] = usuario
+            session['name'] = user['nomClie']  # Supongamos que el nombre del usuario está en la columna 'nomClie'
+            return viewcliente()
+        if es_admin:
+            return redirect(url_for('adminLogged'))  # Redirigir a la página de administrador
+        else:
+            # Si las credenciales son incorrectas, muestra un mensaje de error
+            error_msg = 'Usuario o contraseña incorrectos'
+            return render_template('login.html', error=error_msg)
+
+    # Si la solicitud es GET o cualquier otra, simplemente muestra la página de inicio de sesión
+    return render_template('login.html')
+
+    
+@app.route('/logout', methods=['POST'])
+def logout():
+    session.clear()  # Limpiar la sesión
+    return redirect(url_for('login'))  # Redirigir a la página de inicio de sesión
 # Ruta raíz que muestra una página principal
 @app.route('/')
 def principal():
     return render_template("principal.html")
 
 @app.route('/admin')
+@login_required
+
 def pantallaAdmin():
     return render_template("PantallaAdmin.html")
 
 @app.route('/metodopago')
+@login_required
+
 def metodo():
     return render_template("Metodo_pago.html")
     
 @app.route('/davivienda')
+@login_required
+
 def metododavi():
     return render_template("pagardavi.html")
 # Ruta para mostrar el formulario de categorías
 @app.route('/formulariodecategoria')
+@login_required
+
 def inicioww():
     return render_template('index.html')
 
@@ -61,6 +148,8 @@ def get_imagenes():
 
 # Ruta para registrar una nueva categoría
 @app.route('/form', methods=['GET', 'POST'])
+@login_required
+
 def registrar_categoria():
     msg = ""  # Variable para almacenar mensajes de respuesta
     if request.method == 'POST':
@@ -87,7 +176,10 @@ def registrar_categoria():
         return render_template('index.html', msg='Método HTTP incorrecto')  # Renderiza la plantilla 'index.html' con un mensaje de error de método HTTP
 
 # Ruta para mostrar el formulario de registro de clientes
+
 @app.route('/formulario_cliente')
+@login_required
+
 def inicio_clie():
     return render_template('login.html')
 
@@ -231,6 +323,8 @@ def get_referencias4():
 
 # Ruta para registrar referencias
 @app.route('/refere', methods=['GET', 'POST'])
+@login_required
+
 def referencias():
     if request.method == 'POST':
         idCate = request.form['idCate']
@@ -281,6 +375,8 @@ def referencias():
 
 
 @app.route('/editar-Referencias')
+@login_required
+
 def editarReferencias():
     return render_template('editarRef.html')
 
@@ -435,15 +531,25 @@ def personalizarArticulos():
     referencias = get_referencias()
     return render_template('customize.html',referencias=referencias)
 
-def busosOver():
+def buzosOver():
     referencias = get_referencias1()
     categorias = get_categorias()
-    return render_template('4BusosOver/busosOver.html',referencias=referencias,categorias=categorias)
+    return render_template('4BuzosOver/buzosOver.html',referencias=referencias,categorias=categorias)
 
-def camisetasOversize():
+def camisetasOversized():
     referencias = get_referencias2()
     categorias = get_categorias()
-    return render_template('2CamisetasOversize/camisetasOversize.html',referencias=referencias,categorias=categorias)
+    return render_template('2CamisetasOversized/camisetasOversized.html',referencias=referencias,categorias=categorias)
+
+def camibuzos():
+    referencias = get_referencias3()
+    categorias = get_categorias()
+    return render_template('3Camibuzos/camiBuzos.html', referencias=referencias, categorias=categorias)
+
+def buzosBasicos():
+    referencias = get_referencias4()
+    categorias = get_categorias()
+    return render_template('1BuzosBásicos/buzosBasicos.html', referencias=referencias, categorias=categorias)
 
 @app.route('/catalogo2')
 def catalogo2():
@@ -460,13 +566,13 @@ def category(category_id):
     template_name = None
     
     if category_id == 1:
-        return busosOver()
+        return buzosOver()
     elif category_id == 2:
-        return camisetasOversize()
+        return camisetasOversized() 
     elif category_id == 3:
-        template_name = '3CamiBusos/camiBusos.html'
+        return camibuzos()
     elif category_id == 4:
-        template_name = '1BusosBásicos/busosBasicos.html'
+        return buzosBasicos()
     
     if template_name is None:
         # Handle the case where the category ID is not recognized
@@ -525,38 +631,32 @@ def obtener_referencias_por_categoria(category_id):
 app.secret_key = "tu_clave_secreta"  # Configura una clave secreta para la gestión de sesiones
 
 @app.route('/Administrador')
+@login_required
+
 def adminLogged():
     return render_template('PantallaAdmin.html')
+@app.route('/cliente')
+@login_required
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        # Obtiene los valores del formulario de inicio de sesión
-        usuario = request.form['usuario']
-        password = request.form['password']
+def viewcliente():
+    return render_template('VistaCliente.html')
 
-        # Realiza la consulta para verificar las credenciales en la base de datos
 
-        conexion_MySQLdb = connectionBD()
-        cursor = conexion_MySQLdb.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM clientes WHERE usuario = %s AND passw = %s", (usuario, password))
-        user = cursor.fetchone()  # Obtén una fila de resultados
 
-        if user and password:
-            # Si las credenciales son correctas, inicia una sesión para el usuario
-            session['usuario'] = usuario
-            session['name'] = user['nomClie']  # Supongamos que el nombre del usuario está en la columna 'nomClie'
-            return adminLogged()
+def verificar_credenciales(usuario, password):
+    # Lógica para verificar las credenciales aquí
+    # Supongamos que tienes una variable booleana isAdmin que verifica si el usuario es un administrador
+    if usuario == "ADMIN" and password == "3116176355":
+        return True, True  # Usuario y contraseña de administrador correctos
+    elif usuario == "usuario_normal" and password == "contraseña_usuario":
+        return True, False  # Usuario y contraseña de usuario normal correctos
+    else:
+        return False, False  # Credenciales incorrectas
 
-        else:
-            # Si las credenciales son incorrectas, muestra un mensaje de error
-            error_msg = 'Usuario o contraseña incorrectos'
-            return render_template('login.html', error=error_msg)
 
-    # Si la solicitud es GET o cualquier otra, simplemente muestra la página de inicio de sesión
-    return render_template('login.html')
 
 @app.route("/listar")
+@login_required
 def listar():
     conexion_MySQLdb = connectionBD()
     if conexion_MySQLdb:
@@ -580,6 +680,8 @@ def listar():
     
 #Eliminar Referencia
 @app.route('/eliminarReferencia/<int:referencia_id>', methods=['GET', 'POST'])
+@login_required
+
 def eliminarRef(referencia_id):
     conexion_MySQLdb = connectionBD()
     if conexion_MySQLdb:
@@ -601,6 +703,8 @@ def eliminarRef(referencia_id):
     
 
 @app.route('/editarReferencia/<int:referencia_id>', methods=['GET', 'POST'])
+@login_required
+
 def editarReferencia (referencia_id):
     conexion_MySQLdb = connectionBD()
     if conexion_MySQLdb:
@@ -642,6 +746,8 @@ def editarReferencia (referencia_id):
 
 
 @app.route('/eliminarCliente/<int:cliente_id>', methods=['GET', 'POST'])
+@login_required
+
 def eliminar(cliente_id):
     conexion_MySQLdb = connectionBD()
     if conexion_MySQLdb:
@@ -663,6 +769,8 @@ def eliminar(cliente_id):
 
 
 @app.route('/editarCliente/<int:cliente_id>', methods=['GET', 'POST'])
+@login_required
+
 def editar(cliente_id):
     conexion_MySQLdb = connectionBD()
     if conexion_MySQLdb:

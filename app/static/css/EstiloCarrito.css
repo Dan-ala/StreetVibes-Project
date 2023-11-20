@@ -210,3 +210,10 @@ body{
   opacity: 1;
   width: 10px;
 } */
+/* Estilos CSS para el contenedor scrollable */
+.scroll-container {
+    height: 500px; /* Altura del contenedor */
+    overflow-y: scroll; /* Activar scroll vertical */
+    border: 1px solid #ccc; /* Borde opcional */
+    padding: 10px; /* Espaciado interno */
+}

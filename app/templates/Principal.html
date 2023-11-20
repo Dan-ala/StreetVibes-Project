@@ -7,8 +7,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <title>StreetVibes</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/cards.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/regresar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/StylesChatbot.css') }}">
+
 
     
     
@@ -32,87 +33,43 @@
   </div>
   <br><br><br>
 
-<div class="tarjetas-container">
-    <div class="card">
-        <div class="card-info">
-            <img class="img" src="{{ url_for('static', filename='img/buso8.png') }}" alt="Mi Imagen">
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-info">
-            <img class="img" src="{{ url_for('static', filename='img/buso7.png') }}" alt="Mi Imagen">
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-info">
-            <img class="img" src="{{ url_for('static', filename='img/buso6.png') }}" alt="Mi Imagen">
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-info">
-            <img class="img" src="{{ url_for('static', filename='img/buso5.png') }}" alt="Mi Imagen">
-        </div>
-      </div>
-      
-
-    </div>
-<br><br>
-
-    <div class="tarjetas-container2">
-
-      <div class="card">
-        <div class="card-info">
-            <img class="img" src="{{ url_for('static', filename='img/buso9.png') }}" alt="Mi Imagen">
-        </div>
-      </div>
-     
-      <div class="card">
-        <div class="card-info">
-            <img class="img" src="{{ url_for('static', filename='img/buso2.png') }}" alt="Mi Imagen">
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-info">
-            <img class="img" src="{{ url_for('static', filename='img/imagen.jpg') }}" alt="Mi Imagen">
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-info">
-            <img class="img" src="{{ url_for('static', filename='img/buso3.png') }}" alt="Mi Imagen">
-        </div>
-      </div>
-    </div>
-<br><br>
-    <div class="tarjetas-container3">
-
-      <div class="card">
-        <div class="card-info">
-            <img class="img" src="{{ url_for('static', filename='img/buso4.png') }}" alt="Mi Imagen">
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-info">
-            <img class="img" src="{{ url_for('static', filename='img/buso3.png') }}" alt="Mi Imagen">
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-info">
-            <img class="img" src="{{ url_for('static', filename='img/buso2.png') }}" alt="Mi Imagen">
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-info">
-            <img class="img" src="{{ url_for('static', filename='img/imagen.jpg') }}" alt="Mi Imagen">
-        </div>
-      </div>
-    </div>
-    <!-- Enlaces de redireccionamiento para los formularios  -->
-    
-    <img src="{{ url_for('static', filename='img/qr.png') }}" alt="Mi Imagen" width="100px">
     <script type="text/javascript" src="{{ url_for('static', filename='js/2.js') }}"></script>
-   
+    <div class="card">
+      <div class="chat-header">StreetBot  <span id="toggleChat" onclick="toggleChat()"> ▼</span></div>
+  
+      <div class="chat-window" id="chatbox">
+          <ul class="message-list"></ul>
+      </div>
+  
+      <div class="chat-input">
+          <input type="text" class="message-input" id="userInput" placeholder="Deajate ayudar de StreetBot">
+          <button onclick="enviarMensaje()" class="send-button">Send</button>
+      </div>
+  </div>
+  <script>
+      function enviarMensaje() {
+          var mensaje = document.getElementById("userInput").value;
+          document.getElementById("chatbox").innerHTML += "<p><strong>Tú:</strong> " + mensaje + "</p>";
+  
+          fetch('/chat', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ mensaje: mensaje })
+          })
+          .then(response => response.json())
+          .then(data => {
+              document.getElementById("chatbox").innerHTML += "<p><strong>Chatbot:</strong> " + data.respuesta + "</p>";
+              document.getElementById("userInput").value = "";
+          });
+      }
+  
+      function toggleChat() {
+          const card = document.querySelector('.card');
+          card.classList.toggle('minimized');
+      }
+  </script>
     
     
 </body>
