@@ -14,7 +14,7 @@
 
 </head>
 <body>
-
+    
     <div class="container">
         <button class="Btn">
             <div class="sign"><svg viewBox="0 0 512 512">
@@ -77,70 +77,13 @@
             <div class="row">
                 <!-- <input type="file" class="file-input" accept="image/*" hidden>
                 <button class="choose-img">Choose Image</button> -->
-                <button class="save-img">Save Image</button>
+                <input type="hidden" id="customizedImage" name="customizedImage">
+                <button class="save-img" type="submit" value="upload">Save Image</button>
             </div>
         </div>
     </div>
+</form>
 
     <script type="text/javascript" src="{{ url_for('static', filename="js/c.js") }}"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            var fileInput = document.getElementById('fileInput');
-            var canvas = document.getElementById('canvas');
-            var ctx = canvas.getContext('2d');
-
-            // Evento cuando se selecciona una imagen
-            fileInput.addEventListener('change', function (e) {
-                var file = e.target.files[0];
-                if (file) {
-                    var reader = new FileReader();
-                    reader.onload = function (e) {
-                        var img = new Image();
-                        img.onload = function () {
-                            canvas.width = img.width;
-                            canvas.height = img.height;
-                            ctx.drawImage(img, 0, 0);
-                        };
-                        img.src = e.target.result;
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
-
-            // Aplicar un filtro usando CamanJS
-            document.getElementById('applyFilter').addEventListener('click', function () {
-                Caman(canvas, function () {
-                    this.brightness(10).render();
-                });
-            });
-
-            // Guardar la imagen editada
-            // Guardar la imagen editada y descargarla
-        document.getElementById('saveImage').addEventListener('click', function () {
-            var imageData = canvas.toDataURL(); // Obtener los datos de la imagen
-
-            fetch('/guardar-imagen', {
-                method: 'POST',
-                body: JSON.stringify({ image_data: imageData }),
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.blob()) // Convertir la respuesta a un Blob
-            .then(blob => {
-                // Crear un enlace para descargar la imagen
-                const url = window.URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.setAttribute('download', 'edited_image.png'); // Nombre del archivo
-                link.click();
-                window.URL.revokeObjectURL(url);
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        });
-    });
-    </script>
     </body>
 </html>

@@ -88,7 +88,7 @@ const saveImg = () =>{
     }
     ctx.scale(flipHorizontal, filpVertical)
     ctx.drawImage(previewImg, 0, 0, canvas.width, canvas.height)
-    document.body.appendChild(canvas)
+    // document.body.appendChild(canvas)
 }
 
 
