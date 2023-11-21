@@ -8,7 +8,7 @@
  
 </head>
 <body>
-   <p><a href="/"><--</a></p>
+   <p><a href="/"></a></p>
    {% if error %}
    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
    <script>Swal.fire({
@@ -28,8 +28,16 @@
    )
      </script>
    {% endif %}
-  
-   
+
+
+   <section class="showcase">
+    <header>
+      <h2 class="logo">StreetVibes</h2>
+      <div class="toggle"></div>
+    </header>
+    <video src="../static/img/urban.mp4" muted loop autoplay></video>
+    <div class="overlay"></div>
+</section>
 
     <div class="wrapper">
         <div class="card-switch">
@@ -51,7 +59,7 @@
                      <form class="flip-card__form" action="registrarclie"  method="post">
                         <input class="flip-card__input"  required="" placeholder="Name" type="text" name="nomClie">
                         <input class="flip-card__input"   required="" placeholder="Last name" type="text" name="apellidoClie">
-                        <input class="flip-card__input"  required="" name="email" placeholder="Email" type="text" name="email">
+                        <input class="flip-card__input"  required="" name="email" placeholder="Email" type="email" name="email">
                         <input class="flip-card__input"  required="" placeholder="Phone numbern" type="number" name="telClie">
                         <input class="flip-card__input"  required="" placeholder="User" type="text" name="usuario">
                         <input class="flip-card__input"  required="" name="password" placeholder="Password" type="password" name="password">
@@ -60,44 +68,45 @@
                   </div>
                </div>
             </label>
-        </div>   
+        </div>
+        
    </div>
    <script type="text/javascript" src="{{ url_for('static', filename='js/login.js') }}"></script>
    <div class="card">
-      <div class="chat-header">StreetBot  <span id="toggleChat" onclick="toggleChat()"> ▼</span></div>
-  
-      <div class="chat-window" id="chatbox">
-          <ul class="message-list"></ul>
-      </div>
-  
-      <div class="chat-input">
-          <input type="text" class="message-input" id="userInput" placeholder="Deajate ayudar de StreetBot">
-          <button onclick="enviarMensaje()" class="send-button">Send</button>
-      </div>
-  </div>
-  <script>
-      function enviarMensaje() {
-          var mensaje = document.getElementById("userInput").value;
-          document.getElementById("chatbox").innerHTML += "<p><strong>Tú:</strong> " + mensaje + "</p>";
-  
-          fetch('/chat', {
-              method: 'POST',
-              headers: {
-                  'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({ mensaje: mensaje })
-          })
-          .then(response => response.json())
-          .then(data => {
-              document.getElementById("chatbox").innerHTML += "<p><strong>Chatbot:</strong> " + data.respuesta + "</p>";
-              document.getElementById("userInput").value = "";
-          });
-      }
-  
-      function toggleChat() {
-          const card = document.querySelector('.card');
-          card.classList.toggle('minimized');
-      }
-  </script>
+    <div class="chat-header">StreetBot  <span id="toggleChat" onclick="toggleChat()"> ▼</span></div>
+
+    <div class="chat-window" id="chatbox">
+        <ul class="message-list"></ul>
+    </div>
+
+    <div class="chat-input">
+        <input type="text" class="message-input" id="userInput" placeholder="Déjate ayudar de StreetBot">
+        <button onclick="enviarMensaje()" class="send-button">Send</button>
+    </div>
+</div>
+<script>
+    function enviarMensaje() {
+        var mensaje = document.getElementById("userInput").value;
+        document.getElementById("chatbox").innerHTML += "<p><strong>Tú:</strong> " + mensaje + "</p>";
+
+        fetch('/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ mensaje: mensaje })
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById("chatbox").innerHTML += "<p><strong>Chatbot:</strong> " + data.respuesta + "</p>";
+            document.getElementById("userInput").value = "";
+        });
+    }
+
+    function toggleChat() {
+        const card = document.querySelector('.card');
+        card.classList.toggle('minimized');
+    }
+</script>
 </body>
 </html>

@@ -1,12 +1,10 @@
 # Importación de módulos necesarios
-from flask import Flask, request, render_template,redirect,url_for,session,redirect, jsonify
+from flask import Flask, request, render_template,redirect,url_for,session,redirect, jsonify, send_from_directory
 from flask_uploads import IMAGES, UploadSet, configure_uploads;
 from config import connectionBD
 from werkzeug.utils import secure_filename
 import os
 import shutil
-import psycopg2
-import psycopg2.extras
 
 
 # Creación de una instancia de Flask
@@ -25,24 +23,41 @@ destination_folder = 'app/static/img' #Este 'proceso', estará reflejado en la r
 
 respuestas = {
     "hola": "¡Hola! ¿En qué puedo ayudarte?",
-    "¿qué puedes hacer?": "Te puedo brindar ayuda para:\n<ul><li>Registrarte e ingresar</li><li>Acceder a categorías</li><li>Buscar productos por nombre</li><li>Añadir productos al carrito</li><li>Realizar pagos</li><li>Personalizar tus productos</li></ul>",
+    "¿qué puedes hacer?": "Te puedo brindar ayuda para:\n<ul><li>Registrarte e ingresar</li><li>Acceder a categorías</li><li>Buscar productos por nombre</li><li>Añadir productos al carrito</li><li>Realizar pagos</li><li>Personalizar tus productos</li></ul> Por favor escribe lo que quieres",
     "¿quién eres?": "Soy un chatbot creado por StreetVibes. Mis desarrolladores son Cristian Arango y Daniel Alarcón.",
     "saludos": "¡Hola! ¿En qué puedo ayudarte?",
     "adios": "¡Hasta luego! Espero vuelvas pronto",
     "chau": "¡Hasta luego!",
-    "ayuda": "Puedo ayudarte con algunas preguntas simples. ¡Prueba a preguntarme algo!",
+    "registrarte e ingresar":"Perfecto, Primero tienes que irte donde Dice (login), Luego das Clic para Registrarte, te registrar y vuelves al login, alli podras iniciar secion para continuar con tus compras",
+    "acceder a categoria":"Perfecto, tienes dos Maneras, la primera es en esta pagina principal le das en (catalogo) y apareceran las categorias, tu escoges la de tu gusto y le das click , allí apareceran los productos, la otra es Registrarte y accediendo para que puedas explorar por categorias y añadir productos al carrito",
     "default": "Lo siento, no entiendo esa pregunta."
 }
 
 # Definición de múltiples opciones para una misma respuesta
 opciones_hola = ["hola", "saludos", "buen día" , "HOLA", "helou","hi", "hola como estas","hellou"]
 opciones_adios = ["adios", "chau", "hasta luego", "Hasta pronto","chao", "nos vemos", "hasta la proxima", "See you", "La buena"]
-opciones_hacer = ["¿en qué me puedes ayudar?","en que me puedes ayudar","Que puedes hacer","¿Qué sabes hacer?","Que sabes hacer","¿Qué haces?","Que haces", "que puedes hacer"]
+opciones_hacer = ["¿en qué me puedes ayudar?","en que me puedes ayudar","Que puedes hacer","¿qué sabes hacer?","que sabes hacer","¿qué haces?","que haces", "que puedes hacer", "ayuda","necesito ayuda", "ayudame", "me puedes ayudar","'¿me ayudas?"]
+opciones_eres = ["quien eres","quien te creo","¿quién te creo","que eres","¿qué eres?","¿que eres?","quien eres?", "que sos"]
+opciones_registrar = ["registro","ingresar","quiero ingresar", "quiero registrarme","me quiero registrar","registrarme"]
+opciones_categoria = ["ver categorias","quiero ver las categorias", "acceder", "mirar categorias","categorias"]
+
+
+opciones_hola = [opcion.lower() for opcion in opciones_hola]
+opciones_adios = [opcion.lower() for opcion in opciones_adios]
+opciones_hacer = [opcion.lower() for opcion in opciones_hacer]
+opciones_eres = [opcion.lower() for opcion in opciones_eres]
+opciones_registrar = [opcion.lower() for opcion in opciones_registrar]
+opciones_categoria = [opcion.lower() for opcion in opciones_categoria]
+
 
 # Actualización del diccionario de respuestas
 respuestas.update({opcion: respuestas["hola"] for opcion in opciones_hola})
 respuestas.update({opcion: respuestas["adios"] for opcion in opciones_adios})
 respuestas.update({opcion: respuestas["¿qué puedes hacer?"] for opcion in opciones_hacer})
+respuestas.update({opcion: respuestas["¿quién eres?"] for opcion in opciones_eres})
+respuestas.update({opcion: respuestas["registrarte e ingresar"] for opcion in opciones_registrar})
+respuestas.update({opcion: respuestas["acceder a categoria"] for opcion in opciones_categoria})
+
 
 
 @app.route('/chat', methods=['POST'])
@@ -54,6 +69,15 @@ def chat():
 
     return jsonify({"respuesta": respuesta})
 
+@app.route('/guardar-imagen', methods=['POST'])
+def guardar_imagen():
+    data = request.get_json()
+    image_data = data.get('image_data')  # Obtener los datos de la imagen
+    # Aquí deberías guardar la imagen_data en el servidor en la ruta deseada
+    # Ejemplo: 
+    with open('static/img/', 'wb') as img_file:
+            img_file.write(image_data.encode())
+    return jsonify({'message': 'Imagen guardada exitosamente'})
 
 def login_required(func):
     def wrapper(*args, **kwargs):
@@ -85,9 +109,11 @@ def login():
             # Si las credenciales son correctas, inicia una sesión para el usuario
             session['usuario'] = usuario
             session['name'] = user['nomClie']  # Supongamos que el nombre del usuario está en la columna 'nomClie'
-            return viewcliente()
-        if es_admin:
-            return redirect(url_for('adminLogged'))  # Redirigir a la página de administrador
+            return redirect(url_for('products'))  # Redirigir a la página de administrador
+
+        if usuario == 'ADMIN' and password == '12345':
+            session['usuario'] = usuario
+            return redirect(url_for('adminLogged'))
         else:
             # Si las credenciales son incorrectas, muestra un mensaje de error
             error_msg = 'Usuario o contraseña incorrectos'
@@ -100,11 +126,16 @@ def login():
 @app.route('/logout', methods=['POST'])
 def logout():
     session.clear()  # Limpiar la sesión
-    return redirect(url_for('login'))  # Redirigir a la página de inicio de sesión
+    return redirect(url_for('principal'))  # Redirigir a la página de inicio de sesión
 # Ruta raíz que muestra una página principal
 @app.route('/')
 def principal():
     return render_template("principal.html")
+
+@app.route('/Pagar')
+@login_required
+def pagar():
+    return render_template("Pagar.html")
 
 @app.route('/admin')
 @login_required
@@ -386,6 +417,7 @@ def editarReferencias():
 
 #Testing Shopping-cart
 @app.route('/shopping-cart')
+
 def products():
     conexion_MySQLdb = connectionBD()
     referencias = get_referencias()
@@ -406,8 +438,6 @@ def add_product_to_cart():
 
         if _quantity and _code and request.method == 'POST':
             conexion_MySQLdb = connectionBD()
-
-            #cursor = conexion_MySQLdb.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
             cursor = conexion_MySQLdb.cursor(dictionary=True)
             cursor.execute('SELECT * FROM referencias WHERE code = %s', (_code,))
@@ -517,16 +547,9 @@ def catalogo():
 
     return render_template('catalogo.html',categorias=categorias)
 
-@app.route('/catalogo-cliente')
-def catalogoCliente():
-    referencias = get_referencias()
-
-    #Shopping-Cart
-    
-
-    return render_template('catalogoCliente.html',referencias=referencias)
 
 @app.route('/customize')
+@login_required
 def personalizarArticulos():
     referencias = get_referencias()
     return render_template('customize.html',referencias=referencias)
@@ -536,20 +559,42 @@ def buzosOver():
     categorias = get_categorias()
     return render_template('4BuzosOver/buzosOver.html',referencias=referencias,categorias=categorias)
 
+
+def buzosOver2():
+    referencias = get_referencias1()
+    categorias = get_categorias()
+    return render_template('holi.html',referencias=referencias,categorias=categorias)
+
+
 def camisetasOversized():
     referencias = get_referencias2()
     categorias = get_categorias()
     return render_template('2CamisetasOversized/camisetasOversized.html',referencias=referencias,categorias=categorias)
 
+def camisetasOversized2():
+    referencias = get_referencias2()
+    categorias = get_categorias()
+    return render_template('holi.html',referencias=referencias,categorias=categorias)
+
 def camibuzos():
     referencias = get_referencias3()
     categorias = get_categorias()
-    return render_template('3Camibuzos/camiBuzos.html', referencias=referencias, categorias=categorias)
+    return render_template('3Camibuzos/camiBuzos.html',referencias=referencias,categorias=categorias)
+
+def camibuzos2():
+    referencias = get_referencias3()
+    categorias = get_categorias()
+    return render_template('holi.html',referencias=referencias,categorias=categorias)
 
 def buzosBasicos():
     referencias = get_referencias4()
     categorias = get_categorias()
-    return render_template('1BuzosBásicos/buzosBasicos.html', referencias=referencias, categorias=categorias)
+    return render_template('1BuzosBásicos/buzosBasicos.html',referencias=referencias,categorias=categorias)
+
+def buzosBasicos2():
+    referencias = get_referencias4()
+    categorias = get_categorias()
+    return render_template('holi.html',referencias=referencias,categorias=categorias)
 
 @app.route('/catalogo2')
 def catalogo2():
@@ -583,6 +628,36 @@ def category(category_id):
     # Render the selected template
     return render_template(template_name, category_id=category_id, categorias=categorias, referencias=referencias)
 
+
+
+# DIRECCIONES PARA CADA CATEGORÍA2
+@app.route('/category2/<int:category_id>')
+def category2(category_id):
+    # Determine the template name based on the category ID
+    categorias = get_categorias()
+    template_name = None
+    
+    if category_id == 1:
+        return buzosOver2()
+    elif category_id == 2:
+        return camisetasOversized2() 
+    elif category_id == 3:
+        return camibuzos2()
+    elif category_id == 4:
+        return buzosBasicos2()
+    
+    if template_name is None:
+        # Handle the case where the category ID is not recognized
+        return "Category not found", 404
+    
+    referencias = obtener_referencias_por_categoria(category_id)
+    
+    # Render the selected template
+    return render_template(template_name, category_id=category_id, categorias=categorias, referencias=referencias)
+
+
+
+
 def obtener_informacion_de_imagen(image):
     # Supongamos que 'referencias' es una lista de diccionarios
     conexion = connectionBD()
@@ -602,6 +677,8 @@ def obtener_informacion_de_imagen(image):
     return imagenSeleccionada
 
 @app.route('/customize/<string:image>')
+@login_required
+
 def customize_image(image):
     # Aquí, debes buscar la información de la imagen con el nombre recibido
     # y pasarla a la plantilla de la página de personalización

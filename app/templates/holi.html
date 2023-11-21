@@ -22,9 +22,8 @@ id="bootstrap-css">
 <div class="container">
     <div class="row">
    <div class="cart" id="myModal">
-    <p><h2>Shopping Cart</h2></p>
     <span id="closeModal">&times;</span>
-
+    <p><h2>Shopping Cart</h2></p>
 
         <div>
         {% with messages = get_flashed_messages() %}
@@ -91,9 +90,13 @@ id="bootstrap-css">
                             <span class="glyphicon glyphicon-shopping-cart"></span> Continue Shopping
                         </button></td>
                         <td>
-                        <button type="button" class="btn btn-success">
-                            Checkout <span class="glyphicon glyphicon-play"></span>
-                        </button></td>
+                            <a href="https://www.pse.com.co/persona-tu-primer-pago-por-pse" class="btn btn-success">
+                                Pagar <span class="glyphicon glyphicon-play"></span>
+                            </a>
+                            <a href="{{ url_for('pagar') }}" class="btn btn-success">
+                                Ya pagaste? <span class="glyphicon glyphicon-play"></span>
+                            </a>
+                            
                     </tr>
                 </tbody>
             </table>
@@ -109,28 +112,33 @@ id="bootstrap-css">
                 <div class="section-header">
                     <img id="skate" src="../static/img/skate2.jpg" alt="Skate">
                     <h2>StreetVibes</h2>
-                    <p id="Lorem">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod  labore et dolore magna aliqua.</p>
-                   <br>
+                    <p id="Lorem">Descubre tu propio ritmo en nuestra tienda de moda callejera. Aquí, la individualidad es la regla principal y la creatividad es tu mejor accesorio. Desde prendas clásicas con un giro moderno hasta piezas únicas que desafían las normas, te ofrecemos una colección que celebra la diversidad y la autenticidad de la moda urbana</p>
+                    <form action="{{ url_for('logout') }}" method="post">
+                        <button id="LogOut" type="submit">Cerrar Sesión</button>
+                    </form>
+                    <br>
                 <br>                         
                 </div>
 
-                   <div class="flez">
-                            <input placeholder="Search..." id="search-input">
-                              <button  id="clear-btn">Borrar Filtro
-                              </button>
-                              <button id="openModal">abrir</div>
+    <div class="flez">
+        <input placeholder="Search..." id="search-input">
+        <button id="clear-btn">Borrar Filtro</button>
+        
+        {% for categoria in categorias %}
+        <button id="cc"><a href="{{ url_for('category2', category_id=categoria['idCate']) }}" class="btn btn-primary m-2">{{ categoria.nomCate }}</a></button>
+        {% endfor %}
 
+        <button id="cc"><a href="/shopping-cart" class="btn btn-info m-2">All</a></button>
+    </div>
+
+                              <button id="openModal"><img src="../static/img/shopping-cart.png" alt="shopping-cart" width="50"></div>
                             </div>
-
                        
                         <br>
-            
-                       
-                    
                         <br><br>
+
                         <div id="search-results"></div> <!-- Contenedor para los resultados de búsqueda -->
                 <div class="row">
-                   
 
     {% for referencia in referencias %}
     <div class="col-sm-6 col-lg-3" style="display: none">
@@ -157,11 +165,19 @@ id="bootstrap-css">
                     <li><i class="icofont-star"></i></li>
                 </ul>
                 <h4 class="price">$ {{ referencia.precioRef }}</h4>
+                
             </div>
 
             <div class="add-to-cart">
                 <form class="cart-form" method="post" action="/add">
-                    <input type="hidden" name="code" value="{{ referencia.code }}" />
+                    <input placeholder="Cant"type="hidden" name="code" value="{{ referencia.code }}" />
+                    <select>
+                        <option value="opcion1">S</option>
+                        <option value="opcion2">M</option>
+                        <option value="opcion3">L</option>
+                        <option value="opcion1">XL</option>
+                        <option value="opcion2">XXL</option>
+                    </select>
                     <input type="text" class="product-quantity" name="quantity" value="1" size="2" />
                     <input type="submit" value="Add to Cart" class="default-btn add-to-cart-btn" data-img="{{ referencia.img }}" />
                 </form>
@@ -186,6 +202,7 @@ id="bootstrap-css">
               </svg>
             </span>
           </button>
+         
                             </div>
                         </div>
                         
@@ -233,7 +250,7 @@ id="bootstrap-css">
     </div>
 
     <div class="chat-input">
-        <input type="text" class="message-input" id="userInput" placeholder="Deajate ayudar de StreetBot">
+        <input type="text" class="message-input" id="userInput" placeholder="Déjate ayudar de StreetBot">
         <button onclick="enviarMensaje()" class="send-button">Send</button>
     </div>
 </div>
@@ -251,7 +268,7 @@ id="bootstrap-css">
         })
         .then(response => response.json())
         .then(data => {
-            document.getElementById("chatbox").innerHTML += "<p><strong>Chatbot:</strong> " + data.respuesta + "</p>";
+            document.getElementById("chatbox").innerHTML += "<p><strong>StreetBot:</strong> " + data.respuesta + "</p>";
             document.getElementById("userInput").value = "";
         });
     }

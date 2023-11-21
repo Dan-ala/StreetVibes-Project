@@ -7,6 +7,7 @@
 
     <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.2/css/boxicons.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/camanjs/4.1.2/caman.full.min.js"></script>
 
     <link rel="stylesheet" href="{{ url_for('static', filename='css/customize.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/regresar.css') }}">
@@ -29,14 +30,14 @@
                 <div class="filter">
                     <label class="title">Filters</label>
                     <div class="options">
-                        <button class="active">Agregar Texto</button>
-                        <button>Saturation</button>
-                        <button>Inversion</button>
-                        <button>Grayscale</button>
+                        <!-- <button id="addText" class="active">Agregar Texto</button> -->
+                        <button id="saturation" class="active">Saturation</button>
+                        <button id="inversion">Inversion</button>
+                        <button id="grayscale">Grayscale</button>
                     </div>
                     <div class="slider">
                         <div class="filter-info">
-                            <p class="name">Brightness</p>
+                            <p class="name">Saturation</p>
                             <p class="value">100%</p>
                         </div>
                         <input type="range" value="100" min="0" max="200">
@@ -45,10 +46,10 @@
                 <div class="rotate">
                     <label class="title">Rotate & Flip</label>
                     <div class="options">
-                        <button><i class="fa-solid fa-rotate-left"></i></button>
-                        <button><i class="fa-solid fa-rotate-right"></i></button>
-                        <button><i class="bx bx-reflect-vertical"></i></button>
-                        <button><i class="bx bx-reflect-horizontal"></i></button>
+                        <button id="left"><i class="fa-solid fa-rotate-left"></i></button>
+                        <button id="right"><i class="fa-solid fa-rotate-right"></i></button>
+                        <button id="horizontal"><i class="bx bx-reflect-vertical"></i></button>
+                        <button id="vertical"><i class="bx bx-reflect-horizontal"></i></button>
                     </div>
                 </div>
             </div>
@@ -74,11 +75,72 @@
         <div class="controls">
             <button class="reset-filter">Reset Filters</button>
             <div class="row">
-                <button class="choose-img">Choose Image</button>
+                <!-- <input type="file" class="file-input" accept="image/*" hidden>
+                <button class="choose-img">Choose Image</button> -->
                 <button class="save-img">Save Image</button>
             </div>
         </div>
     </div>
-    
-</body>
+
+    <script type="text/javascript" src="{{ url_for('static', filename="js/c.js") }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var fileInput = document.getElementById('fileInput');
+            var canvas = document.getElementById('canvas');
+            var ctx = canvas.getContext('2d');
+
+            // Evento cuando se selecciona una imagen
+            fileInput.addEventListener('change', function (e) {
+                var file = e.target.files[0];
+                if (file) {
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        var img = new Image();
+                        img.onload = function () {
+                            canvas.width = img.width;
+                            canvas.height = img.height;
+                            ctx.drawImage(img, 0, 0);
+                        };
+                        img.src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // Aplicar un filtro usando CamanJS
+            document.getElementById('applyFilter').addEventListener('click', function () {
+                Caman(canvas, function () {
+                    this.brightness(10).render();
+                });
+            });
+
+            // Guardar la imagen editada
+            // Guardar la imagen editada y descargarla
+        document.getElementById('saveImage').addEventListener('click', function () {
+            var imageData = canvas.toDataURL(); // Obtener los datos de la imagen
+
+            fetch('/guardar-imagen', {
+                method: 'POST',
+                body: JSON.stringify({ image_data: imageData }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.blob()) // Convertir la respuesta a un Blob
+            .then(blob => {
+                // Crear un enlace para descargar la imagen
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', 'edited_image.png'); // Nombre del archivo
+                link.click();
+                window.URL.revokeObjectURL(url);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    });
+    </script>
+    </body>
 </html>

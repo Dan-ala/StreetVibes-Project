@@ -24,7 +24,7 @@ function getPageList(totalPages, page, maxLength){
 
 $(function(){
     let numberOfItems = $(".col-lg-3 .single-publication").length
-    let limitPerPage = 4
+    let limitPerPage = 8
     let totalPages = Math.ceil(numberOfItems / limitPerPage)
     let paginationSize = 10
     let currentPage;

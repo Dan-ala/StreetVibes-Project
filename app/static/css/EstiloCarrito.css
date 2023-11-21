@@ -217,3 +217,23 @@ body{
     border: 1px solid #ccc; /* Borde opcional */
     padding: 10px; /* Espaciado interno */
 }
+
+#openModal{
+    cursor: pointer;
+    border: none;
+    float: right;
+    margin-top: -65px;
+}
+
+#clear-btn:hover{
+    background-color: rgb(249, 33, 33);
+    cursor: pointer;
+}
+
+#btnOver, #LogOut{
+    cursor: pointer;
+}
+
+#cc{
+    border: none;
+}
